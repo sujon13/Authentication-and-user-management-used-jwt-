@@ -11,13 +11,16 @@
   "license": "ISC",
   "dependencies": {
     "@hapi/joi": "^17.1.1",
+    "authy": "^1.4.0",
     "bcryptjs": "^2.4.3",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-validator": "^6.6.0",
     "joi-phone-number": "^4.1.0",
     "jsonwebtoken": "^8.5.1",
+    "messagebird": "^3.5.0",
     "mongoose": "^5.9.20",
+    "nodemailer": "^6.4.10",
     "nodemon": "^2.0.4"
   }
 }

@@ -17,11 +17,12 @@ require('dotenv/config');
 mongoose.connect(
     process.env.DB_CONNECTION,
     { 
-        useNewUrlParser: true
+        useNewUrlParser: true,
+        useUnifiedTopology: true 
     },
     () => {
         console.log('connected to auth database');
     }
 )
 
-app.listen(3000, () => console.log(`auth server is up and runing`));
+app.listen(3000, () => console.log(`auth server is up and running`));
