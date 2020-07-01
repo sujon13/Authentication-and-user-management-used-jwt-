@@ -7,24 +7,55 @@ const otp = require('../library/otp');
 
 
 const User = require('../models/Auth');
-const { signupValidator, verifyToken } = require('../validator');
+const { signupValidator, verifyToken, passwordValidator, emailOrPhoneNumberValidator } = require('../validator');
 
 
-router.get('/refresh', verifyToken, async (req, res) => {
-    console.log(req.user);
-    let accessToken = jwt.sign({user_id: req.user._id}, process.env.TOKEN_SECRET, {expiresIn: '1m'});
-    res.status(200).send(accessToken);
-});
+router.get('/findAccount', emailOrPhoneNumberValidator, async (req, res) => {
 
-router.get('/findAccount', async (req, res) => {
     try {
-        var user = await User.findOne({email: req.query.email});
-        if(!user)return res.status(404).send('Email not found');
-        res.status(200).send('Email Found');
+        let user = undefined;
+        if(req.email !== undefined)user = await User.findOne({email: req.email});
+        else user = await User.findOne({phoneNumber: req.phoneNumber});
+
+        if(user === undefined || !user)return res.status(404).send({error: 'Account not found'});
+        res.status(200).send({message: 'Account Found'});
     } catch(error) {
         console.log(error);
-        res.status(500).send(`server is facing some error. Please try after some time..`);
+        res.status(500).send({error: 'Internal server error'});
     }
+})
+
+router.post('/resetPassword', passwordValidator, async (req,res) => {
+    const password = req.body.password;
+    const email = req.body.email;
+    console.log(`In resetPassword: email: ${email}, password: ${password}`);
+
+    try {
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        if(!hashedPassword)return res.status(500).send({error: 'Internal server error'});
+
+        const query = { email: email};
+        const update = {
+            "$set": {
+                password: hashedPassword
+            }
+        };
+        // Return the updated document instead of the original document
+        const options = { returnNewDocument: true };
+
+        const updatedUser = await User.findOneAndUpdate(query, update, options);
+        if(!updatedUser) {
+            console.log('user could not be found or updated');
+            return res.status(500).send({error: 'Internal server error'})
+        }
+    } catch(error) {
+        console.log(error);
+        res.status(500).send({error: error});
+    }
+
+    res.status(200).send({message: 'password is updated!', email: email});
 })
 
 router.get('/users', verifyToken,  async (req, res) => {
@@ -33,7 +64,7 @@ router.get('/users', verifyToken,  async (req, res) => {
         res.status(200).send(users);
     } catch(error) {
         console.log(error);
-        res.status(404).send(error);
+        res.status(404).send({error: error});
     }
 });
 
@@ -55,13 +86,13 @@ router.post('/signup', signupValidator, async (req, res) => {
     try {
         const savedUser = await user.save();
         if(!savedUser) {
-            console.log(`user could not be saved`);
-            res.status(500).send(`server is facing some error. Please try after some time..`);
+            console.log('user could not be saved');
+            return res.status(500).send({error: 'Internal server error'});
         }
         res.status(201).send(savedUser);
     } catch(error) {
         console.log(error);
-        res.status(500).send(`server is facing some error. Please try after some time..`);
+        res.status(500).send({error: 'Internal server error'});
     }
 });
 
@@ -70,13 +101,13 @@ router.post('/signin', async (req, res) => {
 
     try {
         var user = await User.findOne({email: req.body.email});
-        if(!user)return res.status(401).send('Email or password isInvalid');
+        if(!user)return res.status(401).send({error: 'Email or password is invalid'});
 
         const isPasswordMatched = await bcrypt.compare(body.password, user.password);
-        if(!isPasswordMatched)return res.status(401).send('Email or password isInvalid');
+        if(!isPasswordMatched)return res.status(401).send({error: 'Email or password is invalid'});
     } catch(error) {
         console.log(error);
-        res.status(500).send(`server is facing some error. Please try after some time..`);
+        return res.status(500).send({error: 'Internal server error'});
     }
 
     
@@ -93,54 +124,13 @@ router.post('/signin', async (req, res) => {
     res.status(200).send(response);
 });
 
+router.get('/refresh', verifyToken, async (req, res) => {
+    console.log(req.user);
+    let accessToken = jwt.sign({user_id: req.user._id}, process.env.TOKEN_SECRET, {expiresIn: '1m'});
+    res.status(200).send(accessToken);
+});
 
 /*
-router.get('/:postId', async (req, res) => {
-    try {
-        console.log(req.params.postId);
-        const post = await Post.findById(req.params.postId);
-        if(!post)throw new Error('Invalid id');
-        res.status(201).send(post);
-    } catch(error) {
-        console.log(error.message);
-        res.status(404).send(error.message);
-    }
-})
-
-router.delete('/:postId', async (req, res) => {
-    try {
-        const removedPost = await Post.deleteOne({ _id: req.params.postId });
-        if(!removedPost) {
-            console.log('postmnot found');
-        }
-        console.log(removedPost);
-        res.status(200).send(removedPost);
-    } catch(error) {
-        console.log(error);
-        res.status(404).send(error);
-    }
-})
-
-router.put('/:postId', async (req, res) => {
-    try {
-        const updatedPost = await Post.updateOne(
-            { _id: req.params.postId },
-            {
-                $set: {title: req.body.title}
-            }
-        );
-        if(!updatedPost) {
-            console.log('post not found');
-        }
-        console.log(updatedPost);
-        res.status(200).send(updatedPost);
-    } catch(error) {
-        console.log(error);
-        res.status(404).send(error);
-    }
-})
-
-
 router.post('/createOtp', (req, res) => {
 
     const params = {
@@ -170,6 +160,7 @@ router.post('/verifyOtp', (req, res) => {
       
 })
 */
+
 router.get('/createOtp', async (req, res, next) => {
 
     try {

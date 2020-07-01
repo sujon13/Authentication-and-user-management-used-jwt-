@@ -21,6 +21,7 @@
     "messagebird": "^3.5.0",
     "mongoose": "^5.9.20",
     "nodemailer": "^6.4.10",
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "swagger-ui-express": "^4.1.4"
   }
 }
