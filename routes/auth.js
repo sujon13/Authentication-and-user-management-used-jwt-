@@ -7,7 +7,7 @@ const otp = require('../library/otp');
 
 
 const User = require('../models/Auth');
-const { signupValidator, verifyToken, passwordValidator, emailOrPhoneNumberValidator } = require('../validator');
+const { signupValidator, verifyToken,  verifyAdmin, passwordValidator, emailOrPhoneNumberValidator } = require('../validator');
 
 
 // admin list
@@ -72,7 +72,7 @@ router.get('/users', verifyToken,  async (req, res) => {
 });
 
 
-router.post('/signup', signupValidator, async (req, res) => {
+router.post('/signup', verifyAdmin, signupValidator, async (req, res) => {
     const body = req.body;
 
     // Hash password
@@ -83,9 +83,13 @@ router.post('/signup', signupValidator, async (req, res) => {
         name: body.name,
         email: body.email,
         phoneNumber: body.phoneNumber,
-        password: hashedPassword
+        password: hashedPassword,
+        isAdmin: req.isAdmin
     });
+
+    // check if request comes from any admin
     if(adminList.includes(body.email))user.isAdmin = true;
+
 
     try {
         const savedUser = await user.save();
@@ -147,6 +151,7 @@ router.get('/refresh', verifyToken, async (req, res) => {
 });
 
 /*
+// It was for messagebird api
 router.post('/createOtp', (req, res) => {
 
     const params = {
@@ -177,6 +182,7 @@ router.post('/verifyOtp', (req, res) => {
 })
 */
 
+// otp part
 router.get('/createOtp', async (req, res, next) => {
 
     try {

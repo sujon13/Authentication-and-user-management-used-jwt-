@@ -116,10 +116,30 @@ const verifyToken = async (req, res, next) => {
         req.user = decoded;
         next();
     });
+}
+
+const verifyAdmin = async (req, res, next) => {
+    const token = req.header('Authorization');
+    if(!token){
+        req.isAdmin = false;
+        next();
+    }
+
+    //verify a token symmetric
+    jwt.verify(token, process.env.TOKEN_SECRET, function(err, decoded) {
+        if(err) {
+            req.isAdmin = false;
+        } else {
+            const user = decoded;
+            req.isAdmin = user.isAdmin;
+        }
+        next();
+    });
 
 }
 
 module.exports.signupValidator = signupValidator;
 module.exports.verifyToken = verifyToken;
+module.exports.verifyAdmin = verifyAdmin;
 module.exports.passwordValidator = passwordValidator;
 module.exports.emailOrPhoneNumberValidator= emailOrPhoneNumberValidator;
