@@ -10,6 +10,9 @@ const User = require('../models/Auth');
 const { signupValidator, verifyToken, passwordValidator, emailOrPhoneNumberValidator } = require('../validator');
 
 
+// admin list
+const adminList = ["arifurrahmansujon27@gmail.com"];
+
 router.get('/findAccount', emailOrPhoneNumberValidator, async (req, res) => {
 
     try {
@@ -82,6 +85,7 @@ router.post('/signup', signupValidator, async (req, res) => {
         phoneNumber: body.phoneNumber,
         password: hashedPassword
     });
+    if(adminList.includes(body.email))user.isAdmin = true;
 
     try {
         const savedUser = await user.save();
@@ -89,7 +93,14 @@ router.post('/signup', signupValidator, async (req, res) => {
             console.log('user could not be saved');
             return res.status(500).send({error: 'Internal server error'});
         }
-        res.status(201).send(savedUser);
+        
+        const response = {
+            name: savedUser.name,
+            email: savedUser.email,
+            id: savedUser._id,
+            phoneNumber: savedUser.phoneNumber
+        };
+        res.status(201).send(response);
     } catch(error) {
         console.log(error);
         res.status(500).send({error: 'Internal server error'});
@@ -112,8 +123,13 @@ router.post('/signin', async (req, res) => {
 
     
     //create jwt token
-    let accessToken = jwt.sign({user_id: user._id}, process.env.TOKEN_SECRET, {expiresIn: '1m'});
-    let refreshToken = jwt.sign({user_id: user._id}, process.env.TOKEN_SECRET, {expiresIn: '24h'});
+    const payload = {
+        user_id: user._id,
+        isAdmin: user.isAdmin
+    };
+
+    let accessToken = jwt.sign(payload, process.env.TOKEN_SECRET, {expiresIn: '5m'});
+    let refreshToken = jwt.sign(payload, process.env.TOKEN_SECRET, {expiresIn: '24h'});
 
     const response = {
         message: 'Logged in successfully',

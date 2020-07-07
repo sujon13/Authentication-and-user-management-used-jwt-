@@ -23,6 +23,11 @@ const UserSchema = new moongoose.Schema({
         type: String,
         required: true,
         min: 6
+    },
+    isAdmin: {
+        type: Boolean,
+        required: false,
+        default: false
     }
 })
 

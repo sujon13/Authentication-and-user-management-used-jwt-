@@ -42,14 +42,11 @@ const signupValidator = async (req, res, next) => {
     if(error)return res.status(400).send({error: error.details[0].message});
 
     try {
-        console.log('email check');
         // duplicate email check
         const emailExist = await User.findOne({email: req.body.email});
         if(emailExist){
-            console.log('exists');
             return res.status(400).send({error: 'Email already exists'});
         }
-        console.log('phone check');
         // duplicate phone number check
         const phoneNumberExist = await User.findOne({phoneNumber: req.body.phoneNumber});
         if(phoneNumberExist)return res.status(400).send({error: 'phone number already exists'});
