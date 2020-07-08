@@ -107,12 +107,30 @@ const emailOrPhoneNumberValidator = async (req, res, next) => {
 
 const verifyToken = async (req, res, next) => {
     const token = req.header('Authorization');
+    if(!token)return res.status(401).send('Access Denied! Token is invalid');
+
+    //verify a token symmetric
+    jwt.verify(token, process.env.TOKEN_SECRET, function(err, decoded) {
+        console.log(decoded);
+        if(err){
+            res.status(401).send(err);
+        } else if (decoded.isAccessToken === false) {
+            res.status(401).send('Access Denied! Token is invalid');
+        } else {
+            req.user = decoded;
+            next();
+        }
+    });
+}
+
+const verifyRefreshToken = async (req, res, next) => {
+    const token = req.header('Authorization');
     if(!token)return res.status(401).send({error: 'Access Denied! Token is invalid'});
 
     //verify a token symmetric
     jwt.verify(token, process.env.TOKEN_SECRET, function(err, decoded) {
-        if(err)return res.status(401).send(err);
         console.log(decoded);
+        if(err)return res.status(401).send(err);
         req.user = decoded;
         next();
     });
@@ -127,19 +145,23 @@ const verifyAdmin = async (req, res, next) => {
 
     //verify a token symmetric
     jwt.verify(token, process.env.TOKEN_SECRET, function(err, decoded) {
+        console.log(decoded);
         if(err) {
             req.isAdmin = false;
-        } else {
+        } else if(decoded.isAccessToken === false) {
+            req.isAdmin = false;
+        }
+        else {
             const user = decoded;
             req.isAdmin = user.isAdmin;
         }
         next();
     });
-
 }
 
 module.exports.signupValidator = signupValidator;
 module.exports.verifyToken = verifyToken;
+module.exports.verifyRefreshToken = verifyRefreshToken;
 module.exports.verifyAdmin = verifyAdmin;
 module.exports.passwordValidator = passwordValidator;
 module.exports.emailOrPhoneNumberValidator= emailOrPhoneNumberValidator;

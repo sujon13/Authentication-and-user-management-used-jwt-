@@ -7,7 +7,7 @@ const otp = require('../library/otp');
 
 
 const User = require('../models/Auth');
-const { signupValidator, verifyToken,  verifyAdmin, passwordValidator, emailOrPhoneNumberValidator } = require('../validator');
+const { signupValidator, verifyToken,  verifyAdmin, passwordValidator, emailOrPhoneNumberValidator, verifyRefreshToken } = require('../validator');
 
 
 // admin list
@@ -61,6 +61,7 @@ router.post('/resetPassword', passwordValidator, async (req,res) => {
     res.status(200).send({message: 'password is updated!', email: email});
 })
 
+// only admin
 router.get('/users', verifyToken,  async (req, res) => {
     try {
         const users = await User.find();
@@ -129,11 +130,14 @@ router.post('/signin', async (req, res) => {
     //create jwt token
     const payload = {
         user_id: user._id,
-        isAdmin: user.isAdmin
+        isAdmin: user.isAdmin,
+        isAccessToken: true
     };
+    const payloadForRefreshToken = {...payload};
+    payloadForRefreshToken.isAccessToken = false;
 
-    let accessToken = jwt.sign(payload, process.env.TOKEN_SECRET, {expiresIn: '5m'});
-    let refreshToken = jwt.sign(payload, process.env.TOKEN_SECRET, {expiresIn: '24h'});
+    let accessToken = jwt.sign(payload, process.env.TOKEN_SECRET, {expiresIn: '1h'});
+    let refreshToken = jwt.sign(payloadForRefreshToken, process.env.TOKEN_SECRET, {expiresIn: '24h'});
 
     const response = {
         message: 'Logged in successfully',
@@ -144,9 +148,11 @@ router.post('/signin', async (req, res) => {
     res.status(200).send(response);
 });
 
-router.get('/refresh', verifyToken, async (req, res) => {
+router.get('/refresh', verifyRefreshToken, async (req, res) => {
     console.log(req.user);
-    let accessToken = jwt.sign({user_id: req.user._id}, process.env.TOKEN_SECRET, {expiresIn: '1m'});
+    const payload = {...req.user};
+    payload.isAccessToken = true;
+    let accessToken = jwt.sign(payload, process.env.TOKEN_SECRET, {expiresIn: '1h'});
     res.status(200).send(accessToken);
 });
 

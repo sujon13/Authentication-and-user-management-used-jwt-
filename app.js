@@ -32,4 +32,4 @@ mongoose.connect(
     }
 )
 
-app.listen(3000, () => console.log(`auth server is up and running`));
+app.listen(3000, () => console.log(`auth server is up and running at port 3000`));
