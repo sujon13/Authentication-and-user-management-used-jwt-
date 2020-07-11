@@ -1,6 +1,6 @@
 const Joi = require('@hapi/joi');
-const jwt = require('jsonwebtoken');
 const User = require('./models/Auth');
+const createError = require('http-errors');
 
 const minimumPasswordLength = 6;
 
@@ -69,99 +69,69 @@ const passwordValidator = async (req, res,next) => {
 
 const emailOrPhoneNumberValidator = async (req, res, next) => {
     // check if it is email
-    let userInfo = {email: req.query.userInfo};
     let schema = Joi.object({
         email: Joi.string()
             .min(6)
             .max(100)
             .email({ minDomainSegments: 2 })
+            .required()
     });
     
-    const {error} = schema.validate(userInfo);
+    const {error} = schema.validate(req.query);
     if(!error) {
         console.log('It is valid email');
-        req.email = req.query.userInfo;
+        req.email = req.query.email;
         next();
         return;
     }
 
     //phone number
-    userInfo = {phoneNumber: req.query.userInfo};
     schema = Joi.object({
         phoneNumber: Joi.string()
             .regex(/^01[3456789]{1}[0-9]{8}$/)
             .required()
     });
     
-    const {err} = schema.validate(userInfo);
+    const { err } = schema.validate(req.query);
 
     if(err) {
-        console.log(err);
-        res.status(400).send({error: 'Email or phone Number is invalid'});
+        next(createError(400, 'Email or Phone Number is invalid!'));
     } else {
         console.log('It is valid phone number');
-        req.phoneNumber = req.query.userInfo;
+        req.phoneNumber = req.query.phoneNumber;
         next();
     }
 };
 
-const verifyToken = async (req, res, next) => {
-    const token = req.header('Authorization');
-    if(!token)return res.status(401).send('Access Denied! Token is invalid');
-
-    //verify a token symmetric
-    jwt.verify(token, process.env.TOKEN_SECRET, function(err, decoded) {
-        console.log(decoded);
-        if(err){
-            res.status(401).send(err);
-        } else if (decoded.isAccessToken === false) {
-            res.status(401).send('Access Denied! Token is invalid');
-        } else {
-            req.user = decoded;
-            next();
-        }
-    });
-}
-
-const verifyRefreshToken = async (req, res, next) => {
-    const token = req.header('Authorization');
-    if(!token)return res.status(401).send({error: 'Access Denied! Token is invalid'});
-
-    //verify a token symmetric
-    jwt.verify(token, process.env.TOKEN_SECRET, function(err, decoded) {
-        console.log(decoded);
-        if(err)return res.status(401).send(err);
-        req.user = decoded;
-        next();
-    });
-}
-
-const verifyAdmin = async (req, res, next) => {
-    const token = req.header('Authorization');
-    if(!token){
-        req.isAdmin = false;
-        next();
+const pageAndLimitValidation = async (req, res, next) => {
+    const page = parseInt(req.query.page);
+    const limit = parseInt(req.query.limit);
+    
+    if(!Number.isInteger(page) || !Number.isInteger(limit)) {
+        return next(createError(400, 'page or limit is invalid'));
     }
 
-    //verify a token symmetric
-    jwt.verify(token, process.env.TOKEN_SECRET, function(err, decoded) {
-        console.log(decoded);
-        if(err) {
-            req.isAdmin = false;
-        } else if(decoded.isAccessToken === false) {
-            req.isAdmin = false;
-        }
-        else {
-            const user = decoded;
-            req.isAdmin = user.isAdmin;
-        }
+    req.page = page;
+    req.limit = limit;
+    next();
+};
+
+const mongoDbIdValidation = async (req, res, next) => {
+    const mongoDbIdChecker = new RegExp("^[0-9a-fA-F]{24}$");
+    const id = req.params.id;
+    if(id === undefined) {
         next();
-    });
-}
+        return;
+    }
+
+    if(mongoDbIdChecker.test(id) === false) {
+        return next(createError(400, 'id is invalid'));
+    }
+    next();
+};
 
 module.exports.signupValidator = signupValidator;
-module.exports.verifyToken = verifyToken;
-module.exports.verifyRefreshToken = verifyRefreshToken;
-module.exports.verifyAdmin = verifyAdmin;
 module.exports.passwordValidator = passwordValidator;
-module.exports.emailOrPhoneNumberValidator= emailOrPhoneNumberValidator;
+module.exports.emailOrPhoneNumberValidator = emailOrPhoneNumberValidator;
+module.exports.mongoDbIdChecker = mongoDbIdValidation;
+module.exports.pageAndLimitValidation = pageAndLimitValidation;
