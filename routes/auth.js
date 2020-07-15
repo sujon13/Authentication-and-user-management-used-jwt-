@@ -1,31 +1,31 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 //const messagebird = require('messagebird')(process.env.MESSAGEBIRD_API_KEY);
-const otp = require("../library/otp");
-const createError = require("http-errors");
+const otp = require('../library/otp');
+const createError = require('http-errors');
 
-const User = require("../models/Auth");
+const User = require('../models/Auth');
 const {
     passwordValidator,
-    emailOrPhoneNumberValidator,
-} = require("../validator");
-const { verifyRefreshToken } = require("../verification");
+    emailOrPhoneNumberValidator
+} = require('../validator');
+const { verifyRefreshToken } = require('../verification');
 
 router.get(
-    "/account/find",
+    '/account/find',
     emailOrPhoneNumberValidator,
     async (req, res, next) => {
         try {
             const user = await User.findOne({
-                $or: [{ email: req.email }, { phoneNumber: req.phoneNumber }],
+                $or: [{ email: req.email }, { phoneNumber: req.phoneNumber }]
             });
 
             if (!user) {
-                return next(createError(404, "Account not found!"));
+                return next(createError(404, 'Account not found!'));
             }
-            res.status(200).send("Account Found");
+            res.status(200).send('Account Found');
         } catch (error) {
             next(error);
         }
@@ -33,7 +33,7 @@ router.get(
 );
 
 // assumed first finds account then verified by otp
-router.post("/password/reset", passwordValidator, async (req, res, next) => {
+router.post('/password/reset', passwordValidator, async (req, res, next) => {
     const password = req.body.password;
     const email = req.body.email;
     console.log(`In resetPassword: email: ${email}, password: ${password}`);
@@ -47,29 +47,29 @@ router.post("/password/reset", passwordValidator, async (req, res, next) => {
         const query = { email: email };
         const update = {
             $set: {
-                password: hashedPassword,
-            },
+                password: hashedPassword
+            }
         };
         // Return the updated document instead of the original document
         const options = { returnNewDocument: true };
 
         const updatedUser = await User.findOneAndUpdate(query, update, options);
         if (!updatedUser) {
-            return next(createError(500, "user could not be found or updated"));
+            return next(createError(500, 'user could not be found or updated'));
         }
     } catch (error) {
         return next(error);
     }
 
-    res.status(200).send({ message: "password is updated!", email: email });
+    res.status(200).send({ message: 'password is updated!', email: email });
 });
 
-router.get("/token/refresh", verifyRefreshToken, async (req, res, next) => {
+router.get('/token/refresh', verifyRefreshToken, async (req, res, next) => {
     console.log(req.user);
     const payload = { ...req.user };
     payload.isAccessToken = true;
     let accessToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
-        expiresIn: "1h",
+        expiresIn: '1h'
     });
     res.status(200).send(accessToken);
 });
@@ -108,7 +108,7 @@ router.post('/verifyOtp', (req, res) => {
 
 // otp part
 // otp creation and send to given email
-router.post("/otps/request", async (req, res, next) => {
+router.post('/otps/request', async (req, res, next) => {
     try {
         const createdOtp = await otp.create(req.body.email);
         res.status(createdOtp.statusCode).send(createdOtp);
@@ -118,7 +118,7 @@ router.post("/otps/request", async (req, res, next) => {
 });
 
 // otp verify
-router.post("/otps/verify", async (req, res, next) => {
+router.post('/otps/verify', async (req, res, next) => {
     console.log(req.body.id, req.body.otp);
 
     try {

@@ -20,37 +20,37 @@ components:
             content:
                 text/html:
                     schema:
-                        $ref: "#/components/schemas/Error"
+                        $ref: '#/components/schemas/Error'
         Unauthorized:
             description: Unauthorized. Access token is expired or invalid.
             content:
                 text/html:
                     schema:
-                        $ref: "#/components/schemas/Error"
+                        $ref: '#/components/schemas/Error'
         Forbidden:
             description: Forbidden! You have not enough permission.
             content:
                 text/html:
                     schema:
-                        $ref: "#/components/schemas/Error"
+                        $ref: '#/components/schemas/Error'
         NotFound:
             description: The specified resource was not found
             content:
                 text/html:
                     schema:
-                        $ref: "#/components/schemas/Error"
+                        $ref: '#/components/schemas/Error'
         Conflict:
             description: Email or phone already exist. Please try with another email or phone number.
             content:
                 text/html:
                     schema:
-                        $ref: "#/components/schemas/Error"
+                        $ref: '#/components/schemas/Error'
         ServerError:
             description: Internal Server Error.
             content:
                 text/html:
                     schema:
-                        $ref: "#/components/schemas/Error"
+                        $ref: '#/components/schemas/Error'
 
     schemas:
         Error:
@@ -147,22 +147,22 @@ paths:
                       format: int64
                   example: 5
             responses:
-                "200": # status code
+                '200': # status code
                     description: A JSON array of users
                     content:
                         application/json:
                             schema:
                                 type: array
                                 items:
-                                    $ref: "#/components/schemas/User"
-                "400":
-                    $ref: "#/components/responses/BadRequest"
-                "401":
-                    $ref: "#/components/responses/Unauthorized"
-                "403":
-                    $ref: "#/components/responses/Forbidden"
-                "5xx":
-                    $ref: "#/components/responses/ServerError"
+                                    $ref: '#/components/schemas/User'
+                '400':
+                    $ref: '#/components/responses/BadRequest'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
+                '5xx':
+                    $ref: '#/components/responses/ServerError'
 
         post:
             summary: Register/Signup for users.
@@ -174,7 +174,7 @@ paths:
                     application/json:
                         schema:
                             type: object
-                            $ref: "#/components/schemas/Signup"
+                            $ref: '#/components/schemas/Signup'
                         example:
                             name: Mr X
                             email: abc@gmail.com
@@ -182,19 +182,19 @@ paths:
                             password: 1......8
 
             responses:
-                "201": # status code
+                '201': # status code
                     description: Created.
                     content:
                         application/json:
                             schema:
                                 type: object
-                                $ref: "#/components/schemas/User"
-                "400":
-                    $ref: "#/components/responses/BadRequest"
-                "409":
-                    $ref: "#/components/responses/Conflict"
-                "5xx":
-                    $ref: "#/components/responses/ServerError"
+                                $ref: '#/components/schemas/User'
+                '400':
+                    $ref: '#/components/responses/BadRequest'
+                '409':
+                    $ref: '#/components/responses/Conflict'
+                '5xx':
+                    $ref: '#/components/responses/ServerError'
 
     /users/signin:
         post:
@@ -215,7 +215,7 @@ paths:
                                     type: string
                                     format: password
             responses:
-                "200": # status code
+                '200': # status code
                     description: Created.
                     content:
                         application/json:
@@ -223,15 +223,15 @@ paths:
                                 type: object
                                 properties:
                                     profile:
-                                        $ref: "#/components/schemas/User"
+                                        $ref: '#/components/schemas/User'
                                     accessToken:
                                         type: string
                                     refreshToken:
                                         type: string
-                "401":
-                    $ref: "#/components/responses/Unauthorized"
-                "5xx":
-                    $ref: "#/components/responses/ServerError"
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '5xx':
+                    $ref: '#/components/responses/ServerError'
 
     /users/me:
         get:
@@ -241,19 +241,19 @@ paths:
             description: You need to provide bearer token in Authorization header.
 
             responses:
-                "200": # status code
+                '200': # status code
                     description: OK.
                     content:
                         application/json:
                             schema:
                                 type: object
-                                $ref: "#/components/schemas/User"
-                "401":
-                    $ref: "#/components/responses/Unauthorized"
-                "404":
-                    $ref: "#/components/responses/NotFound"
-                "5xx":
-                    $ref: "#/components/responses/ServerError"
+                                $ref: '#/components/schemas/User'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '5xx':
+                    $ref: '#/components/responses/ServerError'
 
     /users/{id}:
         get:
@@ -262,26 +262,26 @@ paths:
             summary: Returns a user's profile.
             description: Only admin has access to this. Admin needs to provide bearer token in Authorization header.
             parameters:
-                - $ref: "#/components/schemas/Id"
+                - $ref: '#/components/schemas/Id'
 
             responses:
-                "200": # status code
+                '200': # status code
                     description: OK.
                     content:
                         application/json:
                             schema:
                                 type: object
-                                $ref: "#/components/schemas/User"
-                "400":
-                    $ref: "#/components/responses/BadRequest"
-                "401":
-                    $ref: "#/components/responses/Unauthorized"
-                "403":
-                    $ref: "#/components/responses/Forbidden"
-                "404":
-                    $ref: "#/components/responses/NotFound"
-                "5xx":
-                    $ref: "#/components/responses/ServerError"
+                                $ref: '#/components/schemas/User'
+                '400':
+                    $ref: '#/components/responses/BadRequest'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '5xx':
+                    $ref: '#/components/responses/ServerError'
 
         put:
             security:
@@ -289,7 +289,7 @@ paths:
             summary: Updates profile.
             description: A user can update his own account. Admin has also this permission.
             parameters:
-                - $ref: "#/components/schemas/Id"
+                - $ref: '#/components/schemas/Id'
 
             requestBody:
                 description: Enter fields you want to update.
@@ -318,23 +318,23 @@ paths:
                                     description: Only admin has permission to set it
 
             responses:
-                "200": # status code
+                '200': # status code
                     description: OK.
                     content:
                         application/json:
                             schema:
                                 type: object
-                                $ref: "#/components/schemas/User"
-                "400":
-                    $ref: "#/components/responses/BadRequest"
-                "401":
-                    $ref: "#/components/responses/Unauthorized"
-                "403":
-                    $ref: "#/components/responses/Forbidden"
-                "404":
-                    $ref: "#/components/responses/NotFound"
-                "5xx":
-                    $ref: "#/components/responses/ServerError"
+                                $ref: '#/components/schemas/User'
+                '400':
+                    $ref: '#/components/responses/BadRequest'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '5xx':
+                    $ref: '#/components/responses/ServerError'
 
         delete:
             security:
@@ -342,21 +342,21 @@ paths:
             summary: Deletes user profile.
             description: A user can delete his own account. Admin has also this permission.
             parameters:
-                - $ref: "#/components/schemas/Id"
+                - $ref: '#/components/schemas/Id'
 
             responses:
-                "204": # status code
+                '204': # status code
                     description: No Content.
-                "400":
-                    $ref: "#/components/responses/BadRequest"
-                "401":
-                    $ref: "#/components/responses/Unauthorized"
-                "403":
-                    $ref: "#/components/responses/Forbidden"
-                "404":
-                    $ref: "#/components/responses/NotFound"
-                "5xx":
-                    $ref: "#/components/responses/ServerError"
+                '400':
+                    $ref: '#/components/responses/BadRequest'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '5xx':
+                    $ref: '#/components/responses/ServerError'
 
     /auth/account/find:
         get:
@@ -377,18 +377,18 @@ paths:
                   unique: true
 
             responses:
-                "200": # status code
+                '200': # status code
                     description: OK.
                     content:
                         text/html:
                             schema:
                                 type: string
-                "400":
-                    $ref: "#/components/responses/BadRequest"
-                "404":
-                    $ref: "#/components/responses/NotFound"
-                "5xx":
-                    $ref: "#/components/responses/ServerError"
+                '400':
+                    $ref: '#/components/responses/BadRequest'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '5xx':
+                    $ref: '#/components/responses/ServerError'
 
     /auth/password/reset:
         post:
@@ -414,7 +414,7 @@ paths:
                                     format: password
 
             responses:
-                "200": # status code
+                '200': # status code
                     description: OK.
                     content:
                         application/json:
@@ -426,10 +426,10 @@ paths:
                                     email:
                                         type: string
                                         format: email
-                "400":
-                    $ref: "#/components/responses/BadRequest"
-                "5xx":
-                    $ref: "#/components/responses/ServerError"
+                '400':
+                    $ref: '#/components/responses/BadRequest'
+                '5xx':
+                    $ref: '#/components/responses/ServerError'
 
     /auth/token/refresh:
         get:
@@ -438,16 +438,16 @@ paths:
             summary: Gets refresh token.
             description: A user can refresh his token. He must provide his refresh token in Authorization header.
             responses:
-                "200":
+                '200':
                     description: OK.
                     content:
                         text/html:
                             schema:
                                 type: string
-                "401":
-                    $ref: "#/components/responses/Unauthorized"
-                "5xx":
-                    $ref: "#/components/responses/ServerError"
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '5xx':
+                    $ref: '#/components/responses/ServerError'
 
     /auth/otps/request:
         post:
@@ -468,7 +468,7 @@ paths:
                                     maxLength: 100
                                     unique: true
             responses:
-                "200": # status code
+                '200': # status code
                     description: OK.
                     content:
                         application/json:
@@ -481,8 +481,8 @@ paths:
                                         type: integer
                                     id:
                                         type: string
-                "5xx":
-                    $ref: "#/components/responses/ServerError"
+                '5xx':
+                    $ref: '#/components/responses/ServerError'
 
     /auth/otps/verify:
         post:
@@ -504,7 +504,7 @@ paths:
                                     type: integer
 
             responses:
-                "200": # status code
+                '200': # status code
                     description: OK.
                     content:
                         application/json:
@@ -515,7 +515,7 @@ paths:
                                         type: string
                                     statusCode:
                                         type: integer
-                "401":
-                    $ref: "#/components/responses/Unauthorized"
-                "5xx":
-                    $ref: "#/components/responses/ServerError"
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '5xx':
+                    $ref: '#/components/responses/ServerError'

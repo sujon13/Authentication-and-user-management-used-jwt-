@@ -1,32 +1,32 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const bcrypt = require("bcryptjs");
-const createError = require("http-errors");
-const jwt = require("jsonwebtoken");
+const bcrypt = require('bcryptjs');
+const createError = require('http-errors');
+const jwt = require('jsonwebtoken');
 
-const User = require("../models/Auth");
+const User = require('../models/Auth');
 const {
     mongoDbIdChecker,
     pageAndLimitValidation,
-    signupValidator,
-} = require("../validator");
-const { verifyToken, verifyAdmin } = require("../verification");
+    signupValidator
+} = require('../validator');
+const { verifyToken, verifyAdmin } = require('../verification');
 
 // admin list
-const adminList = ["arifurrahmansujon27@gmail.com"];
+const adminList = ['arifurrahmansujon27@gmail.com'];
 
 // only admin
-router.get("/", verifyAdmin, pageAndLimitValidation, async (req, res) => {
+router.get('/', verifyAdmin, pageAndLimitValidation, async (req, res) => {
     const page = req.page;
     const limit = req.limit;
 
     try {
         const users = await User.find(
             {},
-            "_id name email phoneNumber isAdmin",
+            '_id name email phoneNumber isAdmin',
             {
                 skip: (page - 1) * limit,
-                limit: limit,
+                limit: limit
             }
         );
         res.status(200).send(users);
@@ -36,11 +36,11 @@ router.get("/", verifyAdmin, pageAndLimitValidation, async (req, res) => {
 });
 
 // a user can get his own account
-router.get("/me", verifyToken, async (req, res, next) => {
+router.get('/me', verifyToken, async (req, res, next) => {
     try {
         const user = await User.findById(
             req.user.user_id,
-            "_id, name email phoneNumber"
+            '_id, name email phoneNumber'
         );
         if (!user) {
             return next(createError(404, `Account not found`));
@@ -52,11 +52,11 @@ router.get("/me", verifyToken, async (req, res, next) => {
 });
 
 // admin can see a user's account
-router.get("/:id", verifyAdmin, mongoDbIdChecker, async (req, res, next) => {
+router.get('/:id', verifyAdmin, mongoDbIdChecker, async (req, res, next) => {
     try {
         const user = await User.findById(
             req.params.id,
-            "_id, name email phoneNumber"
+            '_id, name email phoneNumber'
         );
         if (!user) {
             return next(
@@ -73,7 +73,7 @@ router.get("/:id", verifyAdmin, mongoDbIdChecker, async (req, res, next) => {
     }
 });
 
-router.post("/", signupValidator, async (req, res, next) => {
+router.post('/', signupValidator, async (req, res, next) => {
     const body = req.body;
 
     // Hash password
@@ -85,7 +85,7 @@ router.post("/", signupValidator, async (req, res, next) => {
         email: body.email,
         phoneNumber: body.phoneNumber,
         password: hashedPassword,
-        isAdmin: false,
+        isAdmin: false
     });
 
     // check if request comes from any admin
@@ -94,14 +94,14 @@ router.post("/", signupValidator, async (req, res, next) => {
     try {
         const savedUser = await user.save();
         if (!savedUser) {
-            return next(createError(500, "user could not be saved"));
+            return next(createError(500, 'user could not be saved'));
         }
 
         const response = {
             name: savedUser.name,
             email: savedUser.email,
             id: savedUser._id,
-            phoneNumber: savedUser.phoneNumber,
+            phoneNumber: savedUser.phoneNumber
         };
         res.status(201).send(response);
     } catch (error) {
@@ -109,20 +109,20 @@ router.post("/", signupValidator, async (req, res, next) => {
     }
 });
 
-router.post("/signin", async (req, res, next) => {
+router.post('/signin', async (req, res, next) => {
     const body = req.body;
 
     try {
         var user = await User.findOne({ email: req.body.email });
         if (!user)
-            return next(createError(401, "Email or password is invalid"));
+            return next(createError(401, 'Email or password is invalid'));
 
         const isPasswordMatched = await bcrypt.compare(
             body.password,
             user.password
         );
         if (!isPasswordMatched)
-            return next(createError(401, "Email or password is invalid"));
+            return next(createError(401, 'Email or password is invalid'));
     } catch (error) {
         next(error);
     }
@@ -131,18 +131,18 @@ router.post("/signin", async (req, res, next) => {
     const payload = {
         user_id: user._id,
         isAdmin: user.isAdmin,
-        isAccessToken: true,
+        isAccessToken: true
     };
     const payloadForRefreshToken = { ...payload };
     payloadForRefreshToken.isAccessToken = false;
 
     let accessToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
-        expiresIn: "1h",
+        expiresIn: '1h'
     });
     let refreshToken = jwt.sign(
         payloadForRefreshToken,
         process.env.TOKEN_SECRET,
-        { expiresIn: "24h" }
+        { expiresIn: '24h' }
     );
 
     const response = {
@@ -150,20 +150,20 @@ router.post("/signin", async (req, res, next) => {
             name: user.name,
             email: user.email,
             phoneNumber: user.phoneNumber,
-            _id: user._id,
+            _id: user._id
         },
         accessToken: accessToken,
-        refreshToken: refreshToken,
+        refreshToken: refreshToken
     };
     res.status(200).send(response);
 });
 
-router.put("/:id", verifyToken, mongoDbIdChecker, async (req, res, next) => {
+router.put('/:id', verifyToken, mongoDbIdChecker, async (req, res, next) => {
     const body = req.body;
     try {
         const user = await User.findById(
             req.params.id,
-            "_id, name, email, phoneNumber"
+            '_id, name, email, phoneNumber'
         );
         if (!user) {
             return next(
@@ -177,7 +177,7 @@ router.put("/:id", verifyToken, mongoDbIdChecker, async (req, res, next) => {
         // ownership verification
         const userId = user._id.toString();
         if (req.user.isAdmin === false && req.user.user_id !== userId) {
-            next(createError(403, "Access Denied! You are not authorized"));
+            next(createError(403, 'Access Denied! You are not authorized'));
             return;
         }
 
@@ -205,7 +205,7 @@ router.put("/:id", verifyToken, mongoDbIdChecker, async (req, res, next) => {
     }
 });
 
-router.delete("/:id", verifyToken, mongoDbIdChecker, async (req, res, next) => {
+router.delete('/:id', verifyToken, mongoDbIdChecker, async (req, res, next) => {
     const body = req.body;
     try {
         const user = await User.findById(req.params.id);
@@ -221,7 +221,7 @@ router.delete("/:id", verifyToken, mongoDbIdChecker, async (req, res, next) => {
         // ownership verification
         const userId = user._id.toString();
         if (req.user.isAdmin === false && req.user.user_id !== userId) {
-            next(createError(403, "Access Denied! You are not authorized"));
+            next(createError(403, 'Access Denied! You are not authorized'));
             return;
         }
 

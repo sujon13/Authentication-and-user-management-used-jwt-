@@ -1,6 +1,6 @@
-const Joi = require("@hapi/joi");
-const User = require("./models/Auth");
-const createError = require("http-errors");
+const Joi = require('@hapi/joi');
+const User = require('./models/Auth');
+const createError = require('http-errors');
 
 const minimumPasswordLength = 6;
 
@@ -18,17 +18,17 @@ const signupValidator = async (req, res, next) => {
             .error((errors) => {
                 errors.forEach((err) => {
                     switch (err.type) {
-                        case "string.empty":
-                            err.message = "phone number should not be empty!";
+                        case 'string.empty':
+                            err.message = 'phone number should not be empty!';
                             break;
                         default:
-                            err.message = "Phone number is invalid!";
+                            err.message = 'Phone number is invalid!';
                             break;
                     }
                 });
                 return errors;
             }),
-        password: Joi.string().min(minimumPasswordLength).required(),
+        password: Joi.string().min(minimumPasswordLength).required()
     });
     // input data validation
     const { error } = schema.validate(req.body);
@@ -41,12 +41,12 @@ const signupValidator = async (req, res, next) => {
         const exists = await User.findOne({
             $or: [
                 { email: req.body.email },
-                { phoneNumber: req.body.phoneNumber },
-            ],
+                { phoneNumber: req.body.phoneNumber }
+            ]
         });
         if (exists) {
             return next(
-                createError(409, "Email or phone number already exists")
+                createError(409, 'Email or phone number already exists')
             );
         }
         next();
@@ -60,9 +60,9 @@ const passwordValidator = async (req, res, next) => {
 
     if (!password || password.length < minimumPasswordLength) {
         console.log(
-            "password must be strong! It should be atleast 6 characters long"
+            'password must be strong! It should be atleast 6 characters long'
         );
-        next(createError(400, "Password should be atleast 6 characters long"));
+        next(createError(400, 'Password should be atleast 6 characters long'));
         return;
     }
     next();
@@ -75,12 +75,12 @@ const emailOrPhoneNumberValidator = async (req, res, next) => {
             .min(6)
             .max(100)
             .email({ minDomainSegments: 2 })
-            .required(),
+            .required()
     });
 
     const { error } = schema.validate(req.query);
     if (!error) {
-        console.log("It is valid email");
+        console.log('It is valid email');
         req.email = req.query.email;
         next();
         return;
@@ -90,15 +90,15 @@ const emailOrPhoneNumberValidator = async (req, res, next) => {
     schema = Joi.object({
         phoneNumber: Joi.string()
             .regex(/^01[3456789]{1}[0-9]{8}$/)
-            .required(),
+            .required()
     });
 
     const { err } = schema.validate(req.query);
 
     if (err) {
-        next(createError(400, "Email or Phone Number is invalid!"));
+        next(createError(400, 'Email or Phone Number is invalid!'));
     } else {
-        console.log("It is valid phone number");
+        console.log('It is valid phone number');
         req.phoneNumber = req.query.phoneNumber;
         next();
     }
@@ -109,7 +109,7 @@ const pageAndLimitValidation = async (req, res, next) => {
     const limit = parseInt(req.query.limit);
 
     if (!Number.isInteger(page) || !Number.isInteger(limit)) {
-        return next(createError(400, "page or limit is invalid"));
+        return next(createError(400, 'page or limit is invalid'));
     }
 
     req.page = page;
@@ -118,7 +118,7 @@ const pageAndLimitValidation = async (req, res, next) => {
 };
 
 const mongoDbIdValidation = async (req, res, next) => {
-    const mongoDbIdChecker = new RegExp("^[0-9a-fA-F]{24}$");
+    const mongoDbIdChecker = new RegExp('^[0-9a-fA-F]{24}$');
     const id = req.params.id;
     if (id === undefined) {
         next();
@@ -126,7 +126,7 @@ const mongoDbIdValidation = async (req, res, next) => {
     }
 
     if (mongoDbIdChecker.test(id) === false) {
-        return next(createError(400, "id is invalid"));
+        return next(createError(400, 'id is invalid'));
     }
     next();
 };

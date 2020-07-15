@@ -1,34 +1,34 @@
-const moongoose = require("mongoose");
+const moongoose = require('mongoose');
 
 const UserSchema = new moongoose.Schema({
     name: {
         type: String,
         required: true,
         min: 3,
-        max: 100,
+        max: 100
     },
     email: {
         type: String,
         required: true,
         min: 6,
         max: 100,
-        unique: true,
+        unique: true
     },
     phoneNumber: {
         type: Number,
         required: true,
-        unique: true,
+        unique: true
     },
     password: {
         type: String,
         required: true,
-        min: 6,
+        min: 6
     },
     isAdmin: {
         type: Boolean,
         required: false,
-        default: false,
-    },
+        default: false
+    }
 });
 
-module.exports = moongoose.model("Account", UserSchema);
+module.exports = moongoose.model('Account', UserSchema);
