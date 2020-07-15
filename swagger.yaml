@@ -1,0 +1,246 @@
+openapi: 3.0.0
+info:
+  title: User Management API
+  description: Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:3000/api/v1
+
+# Descriptions of common components
+components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequest:
+      description: Bad Request. Path parameters, Query parameters or request body is malformed.
+      content:
+        text/html:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Unauthorized. Access token is expired or invalid.
+      content:
+        text/html:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: Forbidden! You have not enough permission.
+      content:
+        text/html:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: The specified resource was not found
+      content:
+        text/html:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflict:
+      description: Email or phone already exist. Please try with another email or phone number.
+      content:
+        text/html:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ServerError:
+      description: Internal Server Error.
+      content:
+        text/html:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: string
+    User:
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 6
+          maxLength: 100
+          unique: true
+        phoneNumber:
+          type: integer
+          format: int64
+          unique: true
+        password:
+          type: string
+          minLength: 6
+          format: password
+        isAdmin:
+          type: boolean
+      required:
+        - id
+        - name
+        - email
+        - phoneNumber
+        - password
+
+    Signup:
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          description: write your name here
+        email:
+          type: string
+          format: email
+          minLength: 6
+          maxLength: 100
+          unique: true
+        phoneNumber:
+          type: integer
+          format: int64
+          unique: true
+        password:
+          type: string
+          minLength: 6
+          format: password
+      required:
+        - name
+        - email
+        - phoneNumber
+        - password
+paths:
+  /users:
+    get:
+      security:
+        - bearerAuth: []
+      summary: Returns  list of registered users.
+      description: Only admin can see users list. You need to provide bearer token in Authorization header.
+
+      parameters:
+        - name: page
+          description: Page you want to get
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            format: int64
+          example: 1
+        - name: limit
+          description: Number of items you want in a page
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            format: int64
+          example: 5
+      responses:
+        "200": # status code
+          description: A JSON array of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "5xx":
+          $ref: "#/components/responses/ServerError"
+
+    post:
+      summary: Register/Signup for users.
+      description: You need to provide your credentials to signup. This api assumes you have already verified your email and phone number.
+      requestBody:
+        description: Give your credentials. All fields are required.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: "#/components/schemas/Signup"
+            example:
+              name: Mr X
+              email: abc@gmail.com
+              phoneNumber: 017........
+              password: 1......8
+
+      responses:
+        "201": # status code
+          description: Created.
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "5xx":
+          $ref: "#/components/responses/ServerError"
+
+  /users/me:
+    get:
+      security:
+        - bearerAuth: []
+      summary: Returns user's own profile.
+      description: You need to provide bearer token in Authorization header.
+
+      responses:
+        "200": # status code
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "5xx":
+          $ref: "#/components/responses/ServerError"
+
+  /users/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      summary: Returns a user's profile.
+      description: Only admin has access to this. Admin needs to provide bearer token in Authorization header.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: string
+          minLength: 24
+          maxLength: 24
+          example: 11049751d867bf37548556b3
+
+      responses:
+        "200": # status code
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "5xx":
+          $ref: "#/components/responses/ServerError"
