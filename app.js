@@ -1,9 +1,14 @@
 const express = require('express');
 const app = express();
+const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
 const createError = require('http-errors');
 
 // common middlewire
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(helmet());
 
 // import routes
 const authRoute = require('./routes/auth');
