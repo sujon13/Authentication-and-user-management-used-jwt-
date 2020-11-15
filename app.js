@@ -3,12 +3,15 @@ const app = express();
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const createError = require('http-errors');
+const cors = require('cors');
 
 // common middlewire
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use('/uploads', express.static('uploads'));
 app.use(cookieParser());
 app.use(helmet());
+app.use(cors());
 
 // import routes
 const authRoute = require('./routes/auth');
@@ -62,6 +65,6 @@ mongoose.connect(
     }
 );
 
-app.listen(3000, () =>
-    console.log(`auth server is up and running at port 3000`)
+app.listen(3001, () =>
+    console.log(`auth server is up and running at port 3001`)
 );

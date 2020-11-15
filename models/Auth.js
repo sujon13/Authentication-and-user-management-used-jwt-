@@ -28,6 +28,9 @@ const UserSchema = new moongoose.Schema({
         type: Boolean,
         required: false,
         default: false
+    },
+    profilePicUrl: {
+        type: String
     }
 });
 

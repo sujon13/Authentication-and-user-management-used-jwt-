@@ -105,6 +105,7 @@ const emailOrPhoneNumberValidator = async (req, res, next) => {
 };
 
 const pageAndLimitValidation = async (req, res, next) => {
+    console.log(req.query.page, req.query.limit);
     const page = parseInt(req.query.page);
     const limit = parseInt(req.query.limit);
 
