@@ -132,8 +132,21 @@ const mongoDbIdValidation = async (req, res, next) => {
     next();
 };
 
+const mongoDbIdCheckerFunc = (id) => {
+    const mongoDbIdChecker = new RegExp('^[0-9a-fA-F]{24}$');
+    if (id === undefined) {
+        return false;
+    }
+
+    if (mongoDbIdChecker.test(id) === false) {
+        return false;
+    }
+    return true;
+}
+
 module.exports.signupValidator = signupValidator;
 module.exports.passwordValidator = passwordValidator;
 module.exports.emailOrPhoneNumberValidator = emailOrPhoneNumberValidator;
 module.exports.mongoDbIdChecker = mongoDbIdValidation;
 module.exports.pageAndLimitValidation = pageAndLimitValidation;
+module.exports.mongoDbIdCheckerFunc = mongoDbIdCheckerFunc;

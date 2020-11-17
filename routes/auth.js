@@ -9,7 +9,9 @@ const createError = require('http-errors');
 const User = require('../models/Auth');
 const {
     passwordValidator,
-    emailOrPhoneNumberValidator
+    emailOrPhoneNumberValidator,
+    signupValidator,
+    mongoDbIdCheckerFunc,
 } = require('../validator');
 const { verifyRefreshToken } = require('../verification');
 
@@ -113,6 +115,7 @@ router.post('/otps/request', async (req, res, next) => {
         const createdOtp = await otp.create(req.body.email);
         res.status(createdOtp.statusCode).send(createdOtp);
     } catch (error) {
+        console.log(error);
         next(error);
     }
 });
@@ -120,6 +123,12 @@ router.post('/otps/request', async (req, res, next) => {
 // otp verify
 router.post('/otps/verify', async (req, res, next) => {
     console.log(req.body.id, req.body.otp);
+
+    if (mongoDbIdCheckerFunc(req.body.id) === false) {
+        const message = 'id is invalid';
+        console.log(message);
+        return res.status(400).send(message);
+    }
 
     try {
         const verifiedOtp = await otp.verify(
@@ -130,6 +139,13 @@ router.post('/otps/verify', async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+});
+
+// account verify
+router.post('/account/verify', signupValidator, async (req, res) => {
+    const body = req.body;
+    console.log(req.body);
+    res.sendStatus(200);
 });
 
 module.exports = router;

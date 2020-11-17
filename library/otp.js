@@ -20,15 +20,16 @@ class OTP {
 
                 // Now save it to database
                 var savedOtp = await otp.save();
+                console.log('saved otp', savedOtp);
                 if (!savedOtp)
                     return reject({
                         statusCode: 500,
-                        error: 'Internal server error'
+                        message: 'Internal server error'
                     });
 
                 // send mail with otp
                 const subject = 'Verification code';
-                const mailBody = `Your verification coe is: ${oneTimePassword}`;
+                const mailBody = `Your verification code is: ${oneTimePassword}`;
 
                 const mailSender = new MailSender(email, subject, mailBody);
                 const sentMail = await mailSender.send();
@@ -36,19 +37,19 @@ class OTP {
                 if (!sentMail)
                     return reject({
                         statusCode: 500,
-                        error: 'Internal server error'
+                        message: 'Internal server error'
                     });
 
                 console.log(`sentMail: ${sentMail}`);
                 const response = {
                     statusCode: 201,
                     id: savedOtp._id,
-                    message: `successfully created otp: ${savedOtp.otp}`
+                    //message: `successfully created otp: ${savedOtp.otp}`
                 };
                 resolve(response);
             } catch (error) {
                 console.log(error);
-                reject({ statusCode: 500, error: error });
+                reject({ statusCode: 500, message: error });
             }
         });
     };
@@ -60,25 +61,25 @@ class OTP {
                 if (!document)
                     return reject({
                         statusCode: 401,
-                        error: 'OTP is expired! Please resend'
+                        message: 'OTP is expired! Please resend'
                     });
 
                 const elapsedTime = Math.floor(
                     (Date.now() - document.createdAt) / 1000
                 );
-                if (elapsedTime > 60)
+                if (elapsedTime > 60 * 2)
                     return reject({
                         statusCode: 401,
-                        error: 'OTP is expired! Please resend'
+                        message: 'OTP is expired! Please resend'
                     });
 
                 if (document.otp !== otp)
-                    return reject({ statusCode: 401, error: 'Invalid otp' });
+                    return reject({ statusCode: 401, message: 'Invalid otp' });
             } catch (error) {
                 console.log(error);
                 return reject({
                     statusCode: 500,
-                    error: 'Internal server error'
+                    message: 'Internal server error'
                 });
             }
 
@@ -90,14 +91,14 @@ class OTP {
                     console.log('otp can not be deleted');
                     return reject({
                         statusCode: 500,
-                        error: 'Internal server error'
+                        message: 'Internal server error'
                     });
                 }
             } catch (error) {
                 console.log(error);
                 return reject({
                     statusCode: 500,
-                    error: 'Internal server error'
+                    message: 'Internal server error'
                 });
             }
 
