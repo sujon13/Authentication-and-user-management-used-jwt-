@@ -67,7 +67,7 @@ class OTP {
                 const elapsedTime = Math.floor(
                     (Date.now() - document.createdAt) / 1000
                 );
-                if (elapsedTime > 60 * 2)
+                if (elapsedTime > 60)
                     return reject({
                         statusCode: 401,
                         message: 'OTP is expired! Please resend'
