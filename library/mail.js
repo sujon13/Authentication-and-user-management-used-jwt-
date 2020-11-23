@@ -12,13 +12,13 @@ class MailSender {
             const transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
-                    user: 'arifurrahmansujon27@gmail.com',
+                    user: 'easychat2021@gmail.com',
                     pass: process.env.MY_GMAIL_PASSWORD
                 }
             });
 
             const mailOptions = {
-                from: 'arifurrahmansujon27@gmail.com',
+                from: 'easychat2021@gmail.com',
                 to: this.to,
                 subject: this.subject,
                 html: this.html
