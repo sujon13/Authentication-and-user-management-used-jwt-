@@ -9,7 +9,7 @@ const createError = require('http-errors');
 const User = require('../models/Auth');
 const {
     passwordValidator,
-    emailOrPhoneNumberValidator,
+    emailValidator,
     signupValidator,
     mongoDbIdCheckerFunc,
 } = require('../validator');
@@ -17,7 +17,7 @@ const { verifyRefreshToken } = require('../verification');
 
 router.get(
     '/account/find',
-    emailOrPhoneNumberValidator,
+    emailValidator,
     async (req, res, next) => {
         try {
             const user = await User.findOne({

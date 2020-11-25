@@ -5,6 +5,7 @@ const createError = require('http-errors');
 const minimumPasswordLength = 6;
 
 const signupValidator = async (req, res, next) => {
+    console.log('phone: ', req.phoneNumber);
     const schema = Joi.object({
         name: Joi.string().min(3).max(100).required(),
         email: Joi.string()
@@ -12,41 +13,45 @@ const signupValidator = async (req, res, next) => {
             .max(100)
             .email({ minDomainSegments: 2 })
             .required(),
-        phoneNumber: Joi.string()
-            .regex(/^01[3456789]{1}[0-9]{8}$/)
-            .required()
-            .error((errors) => {
-                errors.forEach((err) => {
-                    switch (err.type) {
-                        case 'string.empty':
-                            err.message = 'phone number should not be empty!';
-                            break;
-                        default:
-                            err.message = 'Phone number is invalid!';
-                            break;
-                    }
-                });
-                return errors;
-            }),
+        phoneNumber: Joi.string(),
+        // phoneNumber: Joi.string()
+        //     .optional()
+        //     .regex(/^01[3456789]{1}[0-9]{8}$/)
+        //     //.required()
+        //     .error((errors) => {
+        //         errors.forEach((err) => {
+        //             //console.log('erro code: ', err.type);
+        //             switch (err.code) {
+        //                 case 'string.empty':
+        //                     err.message = 'phone number should not be empty!';
+        //                     break;
+        //                 default:
+        //                     //console.log('type:', err);
+        //                     err.message = 'Phone number is invalid!';
+        //                     break;
+        //             }
+        //         });
+        //         return errors;
+        //     }),
         password: Joi.string().min(minimumPasswordLength).required()
     });
     // input data validation
     const { error } = schema.validate(req.body);
     if (error) {
+        console.log('error: ', error);
         return next(createError(400, error.details[0].message));
     }
 
     try {
         // duplicate check
-        const exists = await User.findOne({
-            $or: [
-                { email: req.body.email },
-                { phoneNumber: req.body.phoneNumber }
-            ]
-        });
+        const exists = await User.findOne(
+            {
+                email: req.body.email    
+            }
+        );
         if (exists) {
             return next(
-                createError(409, 'Email or phone number already exists')
+                createError(409, 'Email already exists')
             );
         }
         next();
@@ -68,7 +73,7 @@ const passwordValidator = async (req, res, next) => {
     next();
 };
 
-const emailOrPhoneNumberValidator = async (req, res, next) => {
+const emailValidator = async (req, res, next) => {
     // check if it is email
     let schema = Joi.object({
         email: Joi.string()
@@ -84,23 +89,8 @@ const emailOrPhoneNumberValidator = async (req, res, next) => {
         req.email = req.query.email;
         next();
         return;
-    }
-
-    //phone number
-    schema = Joi.object({
-        phoneNumber: Joi.string()
-            .regex(/^01[3456789]{1}[0-9]{8}$/)
-            .required()
-    });
-
-    const { err } = schema.validate(req.query);
-
-    if (err) {
-        next(createError(400, 'Email or Phone Number is invalid!'));
     } else {
-        console.log('It is valid phone number');
-        req.phoneNumber = req.query.phoneNumber;
-        next();
+        next(createError(400, 'Email is invalid!'));
     }
 };
 
@@ -146,7 +136,7 @@ const mongoDbIdCheckerFunc = (id) => {
 
 module.exports.signupValidator = signupValidator;
 module.exports.passwordValidator = passwordValidator;
-module.exports.emailOrPhoneNumberValidator = emailOrPhoneNumberValidator;
+module.exports.emailValidator = emailValidator;
 module.exports.mongoDbIdChecker = mongoDbIdValidation;
 module.exports.pageAndLimitValidation = pageAndLimitValidation;
 module.exports.mongoDbIdCheckerFunc = mongoDbIdCheckerFunc;
