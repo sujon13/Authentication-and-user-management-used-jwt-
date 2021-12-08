@@ -139,6 +139,7 @@ router.post('/', signupValidator, async (req, res, next) => {
 });
 
 router.post('/signin', async (req, res, next) => {
+    //console.log('signin req: ', req);
     const body = req.body;
     console.log('signin req.body: ', req.body);
 

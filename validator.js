@@ -13,26 +13,26 @@ const signupValidator = async (req, res, next) => {
             .max(100)
             .email({ minDomainSegments: 2 })
             .required(),
-        phoneNumber: Joi.string(),
-        // phoneNumber: Joi.string()
-        //     .optional()
-        //     .regex(/^01[3456789]{1}[0-9]{8}$/)
-        //     //.required()
-        //     .error((errors) => {
-        //         errors.forEach((err) => {
-        //             //console.log('erro code: ', err.type);
-        //             switch (err.code) {
-        //                 case 'string.empty':
-        //                     err.message = 'phone number should not be empty!';
-        //                     break;
-        //                 default:
-        //                     //console.log('type:', err);
-        //                     err.message = 'Phone number is invalid!';
-        //                     break;
-        //             }
-        //         });
-        //         return errors;
-        //     }),
+        //phoneNumber: Joi.string(),
+        phoneNumber: Joi.string()
+            .optional()
+            .regex(/^01[3456789]{1}[0-9]{8}$/)
+            //.required()
+            .error((errors) => {
+                errors.forEach((err) => {
+                    //console.log('erro code: ', err.type);
+                    switch (err.code) {
+                        case 'string.empty':
+                            err.message = 'phone number should not be empty!';
+                            break;
+                        default:
+                            //console.log('type:', err);
+                            err.message = 'Phone number is invalid!';
+                            break;
+                    }
+                });
+                return errors;
+            }),
         password: Joi.string().min(minimumPasswordLength).required()
     });
     // input data validation
