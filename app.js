@@ -65,6 +65,7 @@ mongoose.connect(
     }
 );
 
-app.listen(3000, () =>
-    console.log(`auth server is up and running at port 3000`)
+const port = process.env.PORT || 3001;
+app.listen(port, () =>
+    console.log(`auth server is up and running at port ${port}`)
 );
