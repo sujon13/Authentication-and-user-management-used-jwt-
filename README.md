@@ -1,12 +1,14 @@
 ## Authentication and User Management
 
-This repository is a part of an Ecommerce website. It is microservice for authentication, authorization and user management.
+This repository is a part of an Ecommerce website and a chat site.
 
-#### Other Microservices repository link
+It is like a microservice for authentication, authorization and user management.
 
-[Product Microservice](https://github.com/sujon13/product-microservice)
+#### Other Services repository link
 
-[Cart,Order,Payment Microservice](https://github.com/sujon13/cart-order-payment-microservice)
+[Product Service](https://github.com/sujon13/product-microservice)
+
+[Cart, Order, Payment Service](https://github.com/sujon13/cart-order-payment-microservice)
 
 #### Cloning and Running the Application in local
 
@@ -20,8 +22,8 @@ This repository is a part of an Ecommerce website. It is microservice for authen
 -   Type `npm install` for installing all dependency
 -   Type `npm start` to run the projects
 
-The Application Runs on **localhost:3000**
+The Application Runs on **localhost:3001**
 
 #### Documentation of API
 
-After running application you will get documentation of apis in http://127.0.0.1:3000/api-docs/ url
+After running application you will get documentation of apis in http://127.0.0.1:3001/api-docs/ url
