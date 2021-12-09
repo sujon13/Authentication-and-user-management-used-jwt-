@@ -1,6 +1,6 @@
 ## Authentication and User Management
 
-This repository is a part of an Ecommerce website and a chat site.
+This repository is a part of an Ecommerce website and a Chat site [link](https://github.com/sujon13/Messenger).
 
 It is like a microservice for authentication, authorization and user management.
 
@@ -22,8 +22,14 @@ It is like a microservice for authentication, authorization and user management.
 -   Type `npm install` for installing all dependency
 -   Type `npm start` to run the projects
 
-The Application Runs on **localhost:3001**
 
 #### Documentation of API
 
-After running application you will get documentation of apis in http://127.0.0.1:3001/api-docs/ url
+After running application you will get documentation of apis in http://127.0.0.1:3001/api-docs/ url if your port is 3001
+
+**NB**: You need to create a .env file in project root directory and create below environment variables below run the project :-
+
+ - `DB_CONNECTION=mongodb+srv://<user>:<password>@cluster0.58mik.mongodb.net/<database name>`
+ - `PORT=<any integer>`
+ - `TOKEN_SECRET=<random string>`
+ - `MY_GMAIL_PASSWORD=<user password>`
